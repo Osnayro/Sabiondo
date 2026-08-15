@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -306,6 +307,29 @@
             <span>Toca <b>Compartir</b> <span class="ios-share-icon">⬆️</span> y luego <b>"Agregar a inicio"</b></span>
         </div>
         <button class="install-banner-close" onclick="cerrarBannerInstalacion('ios')" aria-label="Cerrar">✕</button>
+    </div>
+
+    <!-- Modal de Registro / Autenticación de Usuario -->
+    <div id="nickname-modal" class="nickname-overlay">
+        <div class="nickname-card">
+            <h2 class="nickname-title">¡Bienvenido! 🦉</h2>
+            <p class="nickname-subtitle">Ingresa tu apodo y un PIN clave de 4 dígitos para registrar o consultar tu puntaje.</p>
+            
+            <form id="nickname-form" onsubmit="handleUserRegistration(event)">
+                <div class="nickname-input-group">
+                    <label for="nickname-field" class="nickname-label">Tu Apodo / Nickname</label>
+                    <input type="text" id="nickname-field" class="nickname-input" placeholder="Ej. Sabio2026" maxlength="15" required autocomplete="off">
+                </div>
+
+                <div class="nickname-input-group">
+                    <label for="pin-field" class="nickname-label">PIN de Acceso (4 dígitos)</label>
+                    <input type="password" id="pin-field" class="nickname-input" placeholder="Ej. 1234" maxlength="4" pattern="\d{4}" inputmode="numeric" required autocomplete="off">
+                    <span id="nickname-error-msg" class="nickname-error">Ingresa un apodo válido y un PIN de 4 números.</span>
+                </div>
+
+                <button type="submit" id="btn-save-nickname" class="main-btn pulse-ready" style="width: 100%; margin-top: 10px;">Comenzar a Jugar 🚀</button>
+            </form>
+        </div>
     </div>
 
     <!-- ============================================================ -->
