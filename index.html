@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -41,21 +40,6 @@
     </div>
 
     <!-- ============================================================ -->
-    <!-- PANTALLA DE REGISTRO INICIAL (solo la primera vez) -->
-    <!-- ============================================================ -->
-    <div id="lock-screen">
-        <div class="lock-card">
-            <img src="buho.PNG" alt="Sabiondo" class="lock-buho-img" onerror="this.style.display='none';">
-            <h1 class="lock-title">PAES Challenge</h1>
-            <p class="lock-subtitle">Ingresa tu nombre y la clave de acceso para comenzar</p>
-            <input type="text" id="lock-name-input" class="lock-input" placeholder="Tu nombre" maxlength="20" autocomplete="off">
-            <input type="password" id="lock-password-input" class="lock-input" placeholder="Clave de acceso" maxlength="30" autocomplete="off">
-            <div id="lock-error" class="lock-error" style="display:none;"></div>
-            <button id="lock-submit-btn" class="main-btn pulse-ready" onclick="intentarIngresoInicial()">Ingresar 🔑</button>
-        </div>
-    </div>
-
-    <!-- ============================================================ -->
     <!-- APP PRINCIPAL -->
     <!-- ============================================================ -->
     <div class="app-card" id="app-card">
@@ -70,8 +54,11 @@
             <div class="progress-container">
                 <div class="progress-fill" id="progress-fill"></div>
             </div>
-            <div class="score-badge" id="score-badge">⭐ 0 pts</div>
-            <div class="streak-display" id="streak-display">🔥 0</div>
+            <div class="score-badge" id="score-display">⭐ 0 pts</div>
+            <div class="streak-display">🔥 <span id="streak-display">0</span></div>
+            <div class="shield-display" style="background: #0284C7; color: white; padding: 3px 8px; border-radius: 12px; font-weight: 700; font-size: 0.75rem;" title="Escudos de Racha Activos">
+                🛡️ <span id="shield-display">1</span>
+            </div>
             <div class="timer-display" id="timer-display">⏱️ 60s</div>
             <div class="level-display" id="level-display" style="background: #8B5CF6; color: white; padding: 3px 10px; border-radius: 12px; font-weight: 700; font-size: 0.75rem;">📖 Competencia Lectora</div>
         </div>
