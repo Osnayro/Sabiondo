@@ -1,106 +1,64 @@
 
 /**
- * ============================================================
- * PAES Challenge — Service Worker v6.4.2
- * Cache y funcionalidad offline para PWA
- * ============================================================
+ * PAES Challenge / Búho Sabiondo — Service Worker v3
+ * Soporte offline para archivos estáticos (App Shell).
+ * No cachea respuestas de Firestore ni Google Sheets.
  */
 
-const CACHE_NAME = 'paes-challenge-v6.4.2';
+const CACHE_NAME = 'paes-v3';
 
-const ASSETS = [
-    './',
-    './index.html',
-    './styles.css',
-    './effects.js',
-    './banco-lectora.js',
-    './banco-matematica1.js',
-    './banco-matematica2.js',
-    './banco-ciencias.js',
-    './app.js',
-    './buho-svg.js',
-    './buho.PNG',
-    './buho-uniforme.PNG',
-    './icono-app.PNG',
-    './icono-app-maskable.PNG',
-    './manifest.json',
-    './sounds/splash.mp3',
-    './sounds/correct.mp3',
-    './sounds/incorrect.mp3',
-    './sounds/levelup.mp3',
-    './sounds/levelstart.mp3',
-    './sounds/achievement.mp3',
-    './sounds/powerup.mp3',
-    './sounds/star.mp3',
-    './sounds/next.mp3'
+const STATIC_ASSETS = [
+    '/',
+    '/index.html',
+    '/styles.css',
+    '/app.js',
+    '/effects.js',
+    '/buho-svg.js',
+    '/firebase-config.js',
+    '/manifest.json'
 ];
 
+// Instalación: cachear app shell y forzar activación
 self.addEventListener('install', (event) => {
-    console.log('🦉 PAES Challenge v6.4.2 - Instalando...');
+    self.skipWaiting();
     event.waitUntil(
-        caches.open(CACHE_NAME)
-            .then((cache) => {
-                console.log('📦 Cacheando archivos...');
-                return cache.addAll(ASSETS).catch((error) => {
-                    console.warn('⚠️ Algunos archivos no se pudieron cachear:', error);
-                    return Promise.resolve();
-                });
-            })
-            .then(() => {
-                console.log('✅ Instalación completada');
-                return self.skipWaiting();
-            })
+        caches.open(CACHE_NAME).then(cache => cache.addAll(STATIC_ASSETS))
     );
 });
 
+// Activación: limpiar versiones viejas de caché
 self.addEventListener('activate', (event) => {
-    console.log('🦉 PAES Challenge v6.4.2 - Activando...');
     event.waitUntil(
-        caches.keys()
-            .then((keys) => {
-                return Promise.all(
-                    keys.filter((key) => key !== CACHE_NAME)
-                        .map((key) => {
-                            console.log('🗑️ Eliminando caché antigua:', key);
-                            return caches.delete(key);
-                        })
-                );
-            })
-            .then(() => {
-                console.log('✅ Activación completada');
-                return self.clients.claim();
-            })
+        caches.keys().then(keys =>
+            Promise.all(
+                keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))
+            )
+        ).then(() => self.clients.claim())
     );
 });
 
+// Fetch: servir desde caché para estáticos y red para el resto
 self.addEventListener('fetch', (event) => {
-    if (event.request.method !== 'GET') return;
+    const { request } = event;
+
+    // Solo manejar peticiones GET
+    if (request.method !== 'GET') return;
+
+    // Evitar cachear respuestas de Firebase u otros servicios externos
+    const url = new URL(request.url);
+    if (url.origin !== location.origin) return;
+
     event.respondWith(
-        caches.match(event.request)
-            .then((cachedResponse) => {
-                if (cachedResponse) return cachedResponse;
-                return fetch(event.request)
-                    .then((networkResponse) => {
-                        if (!networkResponse || networkResponse.status !== 200) return networkResponse;
-                        const responseClone = networkResponse.clone();
-                        caches.open(CACHE_NAME)
-                            .then((cache) => cache.put(event.request, responseClone))
-                            .catch(() => {});
-                        return networkResponse;
-                    })
-                    .catch(() => {
-                        if (event.request.mode === 'navigate') return caches.match('./index.html');
-                        return new Response('Recurso no disponible offline', { status: 503, statusText: 'Service Unavailable' });
-                    });
-            })
+        caches.match(request).then(cached => {
+            if (cached) return cached;
+            return fetch(request).then(response => {
+                // Cachear solo si la respuesta es válida y es un archivo estático
+                if (response.ok && (url.pathname.startsWith('/') && !url.pathname.includes('.'))) {
+                    const clone = response.clone();
+                    caches.open(CACHE_NAME).then(cache => cache.put(request, clone));
+                }
+                return response;
+            });
+        })
     );
 });
-
-self.addEventListener('message', (event) => {
-    if (event.data === 'skipWaiting') self.skipWaiting();
-    if (event.data === 'clearCache') {
-        caches.delete(CACHE_NAME).then(() => console.log('🗑️ Caché eliminada'));
-    }
-});
-
-console.log('🦉 PAES Challenge Service Worker v6.4.2 registrado');
